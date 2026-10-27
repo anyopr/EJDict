@@ -10,24 +10,33 @@ let dict={};
 
 fetch(URL).then(x=>x.json()).then(x=>{
   dict=x;
-  if(location.hash.startsWith("#/")){
+
+  const params = new URLSearchParams(location.search);
+  const word = params.get("q");
+
+  if(word){
     q.style.display = "none";
     btn.style.display = "none";
-    show(decodeURIComponent(location.hash.slice(2)));
+    show(decodeURIComponent(word));
   } else {
     r.textContent="ready";
   }
 }).catch(()=>r.textContent="load failed");
 
 function esc(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
 
 function show(w){
   q.value=w;
   const key=Object.keys(dict).find(k=>k.toLowerCase()===w.toLowerCase());
   if(!key){ r.textContent="not found"; return; }
-  location.hash="#/"+encodeURIComponent(key);
+  history.replaceState(null, "", "?q=" + encodeURIComponent(key));
   r.innerHTML="<b>"+esc(key)+"</b><br>"+esc(dict[key]).replace(/ \/\s*/g,"<br>");
 }
 
@@ -39,12 +48,4 @@ function search(){
     show(w);
   }
 }
-
-addEventListener("hashchange",()=> {
-  if(location.hash.startsWith("#/")) {
-    q.style.display = "none";
-    btn.style.display = "none";
-    show(decodeURIComponent(location.hash.slice(2)));
-  }
-});
 </script>
