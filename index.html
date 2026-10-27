@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<input id="q"><button id="btn" onclick="search()">検索</button>
+<br>
+<div id="r">loading...</div>
+<script>
+const URL="https://anyopr.github.io/EJDict/ejdict.json";
+const q=document.getElementById("q"), r=document.getElementById("r"), btn=document.getElementById("btn");
+let dict={};
+
+fetch(URL).then(x=>x.json()).then(x=>{
+  dict=x;
+  if(location.hash.startsWith("#/")){
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(decodeURIComponent(location.hash.slice(2)));
+  } else {
+    r.textContent="ready";
+  }
+}).catch(()=>r.textContent="load failed");
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function show(w){
+  q.value=w;
+  const key=Object.keys(dict).find(k=>k.toLowerCase()===w.toLowerCase());
+  if(!key){ r.textContent="not found"; return; }
+  location.hash="#/"+encodeURIComponent(key);
+  r.innerHTML="<b>"+esc(key)+"</b><br>"+esc(dict[key]).replace(/ \/\s*/g,"<br>");
+}
+
+function search(){
+  const w=q.value.trim();
+  if(w){
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(w);
+  }
+}
+
+addEventListener("hashchange",()=> {
+  if(location.hash.startsWith("#/")) {
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(decodeURIComponent(location.hash.slice(2)));
+  }
+});
+</script>
