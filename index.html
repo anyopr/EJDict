@@ -4,6 +4,8 @@
 <br>
 <div id="r">loading...</div>
 <script>
+    const q = new URLSearchParams(location.search).get('q');
+    document.body.innerText = q;
 const URL="ejdict.json";
 const q=document.getElementById("q"), r=document.getElementById("r"), btn=document.getElementById("btn");
 let dict={};
