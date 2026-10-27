@@ -1,48 +1,50 @@
 <!doctype html>
 <meta charset="utf-8">
-<input id="q"><button id="btn">検索</button>
+<input id="q"><button id="btn" onclick="search()">検索</button>
 <br>
 <div id="r">loading...</div>
 <script>
-    const q = new URLSearchParams(location.search).get('q');
-    document.body.innerText = q;
-const URL="ejdict.json";
+const URL="https://anyopr.github.io/EJDict/ejdict.json";
 const q=document.getElementById("q"), r=document.getElementById("r"), btn=document.getElementById("btn");
 let dict={};
 
+fetch(URL).then(x=>x.json()).then(x=>{
+  dict=x;
+  if(location.hash.startsWith("#/")){
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(decodeURIComponent(location.hash.slice(2)));
+  } else {
+    r.textContent="ready";
+  }
+}).catch(()=>r.textContent="load failed");
+
 function esc(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#39;");
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
 function show(w){
-  const key=Object.keys(dict).find(k=>k.toLowerCase()===String(w).toLowerCase());
+  q.value=w;
+  const key=Object.keys(dict).find(k=>k.toLowerCase()===w.toLowerCase());
   if(!key){ r.textContent="not found"; return; }
-  q.value=key;
+  location.hash="#/"+encodeURIComponent(key);
   r.innerHTML="<b>"+esc(key)+"</b><br>"+esc(dict[key]).replace(/ \/\s*/g,"<br>");
 }
 
 function search(){
   const w=q.value.trim();
-  if(!w) return;
-  show(w);
-  history.replaceState(null, "", "?q=" + encodeURIComponent(w));
+  if(w){
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(w);
+  }
 }
 
-btn.onclick = search;
-
-fetch(URL).then(x=>x.json()).then(x=>{
-  dict=x;
-  r.textContent="ready";
-
-  const params = new URLSearchParams(location.search);
-  const word = params.get("q");
-  if(word){
-    show(word);
+addEventListener("hashchange",()=> {
+  if(location.hash.startsWith("#/")) {
+    q.style.display = "none";
+    btn.style.display = "none";
+    show(decodeURIComponent(location.hash.slice(2)));
   }
-}).catch(()=>r.textContent="load failed");
+});
 </script>
