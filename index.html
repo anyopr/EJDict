@@ -10,10 +10,12 @@ let dict={};
 
 fetch(URL).then(x=>x.json()).then(x=>{
   dict=x;
-  if(location.hash.startsWith("#/")){
+
+  const param = new URLSearchParams(location.search).get("q");
+  if (param) {
     q.style.display = "none";
     btn.style.display = "none";
-    show(decodeURIComponent(location.hash.slice(2)));
+    show(param);
   } else {
     r.textContent="ready";
   }
@@ -27,7 +29,6 @@ function show(w){
   q.value=w;
   const key=Object.keys(dict).find(k=>k.toLowerCase()===w.toLowerCase());
   if(!key){ r.textContent="not found"; return; }
-  location.hash="#/"+encodeURIComponent(key);
   r.innerHTML="<b>"+esc(key)+"</b><br>"+esc(dict[key]).replace(/ \/\s*/g,"<br>");
 }
 
@@ -39,12 +40,4 @@ function search(){
     show(w);
   }
 }
-
-addEventListener("hashchange",()=> {
-  if(location.hash.startsWith("#/")) {
-    q.style.display = "none";
-    btn.style.display = "none";
-    show(decodeURIComponent(location.hash.slice(2)));
-  }
-});
 </script>
